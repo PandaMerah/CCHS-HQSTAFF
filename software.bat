@@ -1,0 +1,1 @@
+winget install --id=Google.Chrome -e  --scope "machine" && winget install --id=AnyDeskSoftwareGmbH.AnyDesk -e  --scope "machine" && winget install --id=Microsoft.Teams -e  --scope "machine" && winget install --id=RARLab.WinRAR -e  --scope "machine" && winget install --id=Box.Box -e  --scope "machine" && winget install --id=Adobe.Acrobat.Reader.64-bit -e  --scope "machine"
