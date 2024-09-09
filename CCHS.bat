@@ -66,7 +66,7 @@ winget install --id=Adobe.Acrobat.Reader.64-bit -e -h --force
 
 if %installOffice%==1 (
     echo ........Installing Office........
-    ###call .\Office\office.bat
+    ::call .\Office\office.bat
     start .\Office\setup.exe /configure .\Office\configuration.xml
 ) else if %installOffice%==0 (
     echo ........Installing WPS........
@@ -75,7 +75,7 @@ if %installOffice%==1 (
 
 if %installTPP%==1 (
     echo ........Installing TPP........
-    start /w tpp.exe /silent
+    start /w .\TPP.exe /silent
 )
 
 :: Customizing Windows
@@ -84,7 +84,7 @@ reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWind
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowTaskViewButton /t REG_DWORD /d 0 /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d 0 /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f
-copy "CCHS_WALLPAPER.jpg" "%USERPROFILE%\Documents"
+copy .\CCHS_WALLPAPER.jpg "%USERPROFILE%\Documents"
 reg add "HKCU\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d "%USERPROFILE%\Documents\CCHS_WALLPAPER.jpg" /f
 RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters
 
@@ -92,7 +92,7 @@ RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters
 :: Installing HQ Printers
 if %installPrinters%==1 (
     echo ........Installing HQ Printers........
-    pnputil /add-driver ".\printerDriver\Konica\KOAXCJ__.inf" /install
+    pnputil /add-driver .\printerDriver\Konica\KOAXCJ__.inf /install
     if %errorlevel% neq 0 (
         echo Failed to install the printer driver.
         pause
@@ -106,7 +106,7 @@ if %installPrinters%==1 (
         exit /b
     )
     echo Printer port created successfully.
-    rundll32 printui.dll,PrintUIEntry /if /b "%printer1_name%" /r "IP_%printer1_ip%" /m "KOAXCJ__.inf" /f ".\printerDriver\Konica\KOAXCJ__.inf"
+    rundll32 printui.dll,PrintUIEntry /if /b "%printer1_name%" /r "IP_%printer1_ip%" /m "KOAXCJ__.inf" /f .\printerDriver\Konica\KOAXCJ__.inf
     if %errorlevel% neq 0 (
         echo Failed to install the printer.
         pause
