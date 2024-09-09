@@ -15,6 +15,7 @@ set printer2_name=Sharp MX-3140n Printer
 
 :: Start script
 echo Customization of the installation script
+cd "%USERPROFILE%\Downloads\CCHS-HQSTAFF-main"
 
 :: User Customization
 choice /M "Install printers HQ?"
