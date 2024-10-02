@@ -90,7 +90,7 @@ if %runTimeSync%==1 (
 
 :: Chocolatey installation check
 if %runChocolatey%==1 (
-    choco -v >nul 2>&1
+    where choco >nul 2>&1
     if %errorlevel% neq 0 (
         echo Installing Chocolatey...
         @powershell -NoProfile -ExecutionPolicy Bypass -Command "Set-ExecutionPolicy Bypass -Scope Process; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
@@ -133,7 +133,7 @@ if %installPrinters%==1 (
     echo Installing HQ Printers...
 
     :: Install Konica Printer Driver
-    pnputil /add-driver .\printerDriver\Konica\KOAXCJ__.inf /install
+    pnputil /add-driver ".\printerDriver\winx64\KOAXCJ__.inf" /install /force
     if %errorlevel% neq 0 (
         echo Failed to install the Konica printer driver.
         pause
@@ -151,7 +151,7 @@ if %installPrinters%==1 (
     echo Konica printer port created successfully.
 
     :: Add Konica printer
-    rundll32 printui.dll,PrintUIEntry /if /b "%printer1_name%" /r "IP_%printer1_ip%" /m "KOAXCJ__.inf" /f .\printerDriver\Konica\KOAXCJ__.inf
+    rundll32 printui.dll,PrintUIEntry /if /b "%printer1_name%" /r "IP_%printer1_ip%" /m "KOAXCJ__.inf" /f .\printerDriver\64bit\KOAXCJ__.inf
     if %errorlevel% neq 0 (
         echo Failed to install Konica printer.
         pause
@@ -160,7 +160,7 @@ if %installPrinters%==1 (
     echo Konica Printer Added.
 
     :: Install Sharp Printer Driver
-    pnputil /add-driver ".\printerDriver\Sharp\ss0emenu.inf" /install
+    pnputil /add-driver ".\printerDriver\64bit\ss0emenu.inf" /install /force
     if %errorlevel% neq 0 (
         echo Failed to install the Sharp printer driver.
         pause
@@ -188,6 +188,30 @@ if %installPrinters%==1 (
     echo All printers installed successfully.
 )
 
-echo Fresh Windows setup is complete!
+:: Windows Customization
+echo Customizing Windows...
+
+:: Disable Windows Copilot
+reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f
+
+:: Hide Task View button
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowTaskViewButton /t REG_DWORD /d 0 /f
+
+:: Disable Widgets on Taskbar
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d 0 /f
+
+:: Show search box on Taskbar
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f
+
+:: Copy wallpaper to user's Documents folder
+copy /Y ".\CCHS_WALLPAPER.jpg" "%USERPROFILE%\Documents"
+
+:: Set custom wallpaper
+reg add "HKCU\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d "%USERPROFILE%\Documents\CCHS_WALLPAPER.jpg" /f
+
+:: Refresh the wallpaper setting
+RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters ,1 ,True
+
+echo Windows customization complete.
 pause
 exit
