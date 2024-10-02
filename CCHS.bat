@@ -89,16 +89,14 @@ if %runTimeSync%==1 (
 )
 
 :: Chocolatey installation check
-if %runChocolatey%==1 (
-    where choco >nul 2>&1
-    if %errorlevel% neq 0 (
-        echo Installing Chocolatey...
-        @powershell -NoProfile -ExecutionPolicy Bypass -Command "Set-ExecutionPolicy Bypass -Scope Process; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
-        :: Refresh environment variables after installing Chocolatey
-        refreshenv
-    ) else (
-        echo Chocolatey is already installed, skipping installation...
-    )
+@powershell -NoProfile -ExecutionPolicy Bypass -Command "if ((Get-Command -Name choco.exe -ErrorAction SilentlyContinue) -eq $null) { exit 1 } else { exit 0 }"
+
+if %errorlevel%==1 (
+    echo Installing Chocolatey...
+    @powershell -NoProfile -ExecutionPolicy Bypass -Command "Set-ExecutionPolicy Bypass -Scope Process; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
+    refreshenv
+) else (
+    echo Chocolatey is already installed.
 )
 
 :: Install apps using Chocolatey
@@ -130,10 +128,15 @@ if %installTPP%==1 (
 
 :: Install HQ Printers
 if %installPrinters%==1 (
+
+    bcdedit /set nointegritychecks on
+    bcdedit /set testsigning on
+    echo Driver signature enforcement disabled.
+
     echo Installing HQ Printers...
 
     :: Install Konica Printer Driver
-    pnputil /add-driver ".\printerDriver\winx64\KOAXCJ__.inf" /install /force
+    pnputil /add-driver ".\printerDriver\win_x64\KOAXCJ__.inf" /install /force
     if %errorlevel% neq 0 (
         echo Failed to install the Konica printer driver.
         pause
@@ -151,7 +154,7 @@ if %installPrinters%==1 (
     echo Konica printer port created successfully.
 
     :: Add Konica printer
-    rundll32 printui.dll,PrintUIEntry /if /b "%printer1_name%" /r "IP_%printer1_ip%" /m "KOAXCJ__.inf" /f .\printerDriver\64bit\KOAXCJ__.inf
+    rundll32 printui.dll,PrintUIEntry /if /b "%printer1_name%" /r "IP_%printer1_ip%" /m "KOAXCJ__.inf" /f .\printerDriver\win_x64\KOAXCJ__.inf
     if %errorlevel% neq 0 (
         echo Failed to install Konica printer.
         pause
@@ -178,13 +181,16 @@ if %installPrinters%==1 (
     echo Sharp printer port created successfully.
 
     :: Add Sharp printer
-    rundll32 printui.dll,PrintUIEntry /if /b "%printer2_name%" /r "IP_%printer2_ip%" /m "ss0emenu.inf" /f ".\printerDriver\Sharp\ss0emenu.inf"
+    rundll32 printui.dll,PrintUIEntry /if /b "%printer2_name%" /r "IP_%printer2_ip%" /m "ss0emenu.inf" /f ".\printerDriver\64bit\ss0emenu.inf"
     if %errorlevel% neq 0 (
         echo Failed to install Sharp printer.
         pause
         exit /b
     )
     echo Sharp Printer Added.
+
+    bcdedit /set nointegritychecks off
+    bcdedit /set testsigning off   
     echo All printers installed successfully.
 )
 
